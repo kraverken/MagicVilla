@@ -14,5 +14,11 @@ namespace MagicVilla_VillaAPI.Controllers
         {
             return VillaStore.villaList;
         }
+
+        [HttpGet("{id:int}")]
+        public VillaDTO GetVilla(int id) //Creating a public enumerable method getVillas of type Villa 
+        {
+            return VillaStore.villaList.FirstOrDefault(x=>x.Id==id);
+        }
     }
 }
