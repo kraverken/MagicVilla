@@ -10,15 +10,27 @@ namespace MagicVilla_VillaAPI.Controllers
     public class VillaAPIController :ControllerBase
     {
         [HttpGet]
-        public IEnumerable<VillaDTO> GetVillas() //Creating a public enumerable method getVillas of type Villa 
+        public ActionResult< IEnumerable<VillaDTO>>GetVillas() //Creating a public enumerable method getVillas of type Villa 
         {
-            return VillaStore.villaList;
+            return Ok(VillaStore.villaList);
         }
 
         [HttpGet("{id:int}")]
-        public VillaDTO GetVilla(int id) //Creating a public enumerable method getVillas of type Villa 
+        public ActionResult<VillaDTO> GetVilla(int id) //Creating a public enumerable method getVillas of type Villa 
         {
-            return VillaStore.villaList.FirstOrDefault(x=>x.Id==id);
+            var villa=VillaStore.villaList.FirstOrDefault(x=>x.Id==id);
+            if (id == 0)
+            {
+                return BadRequest();
+            }
+            else if (villa == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+            return Ok(villa);
+            }
         }
     }
 }
