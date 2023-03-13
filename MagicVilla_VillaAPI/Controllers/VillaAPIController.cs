@@ -15,7 +15,7 @@ namespace MagicVilla_VillaAPI.Controllers
             return Ok(VillaStore.villaList);
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name ="GetVilla")]
         public ActionResult<VillaDTO> GetVilla(int id) //Creating a public enumerable method getVillas of type Villa 
         {
             var villa=VillaStore.villaList.FirstOrDefault(x=>x.Id==id);
@@ -34,6 +34,7 @@ namespace MagicVilla_VillaAPI.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         public ActionResult<VillaDTO> CreateVilla([FromBody] VillaDTO villaDTO) //property to be bounded using request body
         {
             if (villaDTO == null)
@@ -46,7 +47,8 @@ namespace MagicVilla_VillaAPI.Controllers
             }
             villaDTO.Id=VillaStore.villaList.OrderByDescending(u=>u.Id).FirstOrDefault().Id+1;
             VillaStore.villaList.Add(villaDTO);
-            return Ok(villaDTO);
+            //return Ok(villaDTO);
+            return CreatedAtRoute("GetVilla",new { id = villaDTO.Id }, villaDTO);
         }
     }
 }
