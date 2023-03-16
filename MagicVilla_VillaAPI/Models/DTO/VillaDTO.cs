@@ -9,5 +9,8 @@ namespace MagicVilla_VillaAPI.Models.DTO
         //These validations are provided by the [APIController] and if we comment it out then these validations will be of no use
         [MaxLength(30)]
         public string Name { get; set; }
+        public int Occupancy { get; set; }
+        public int Sqft { get; set; }
+
     }
 }
