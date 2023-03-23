@@ -4,9 +4,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-Log.Logger= new LoggerConfiguration().MinimumLevel.Information().WriteTo.File("log/villaLogs.txt",rollingInterval:RollingInterval.Year).CreateLogger();
+//Log.Logger= new LoggerConfiguration().MinimumLevel.Information().WriteTo.File("log/villaLogs.txt",rollingInterval:RollingInterval.Year).CreateLogger();
 
-builder.Host.UseSerilog(); //dont use built in logger instead use Serilogger
+//builder.Host.UseSerilog(); //dont use built in logger instead use Serilogger
 
 builder.Services.AddControllers().AddNewtonsoftJson();//.AddXmlDataContractSerializerFormatters() in order to add XML output format support 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
