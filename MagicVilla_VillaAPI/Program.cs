@@ -1,3 +1,4 @@
+using MagicVilla_VillaAPI.Logging;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,8 @@ builder.Services.AddControllers().AddNewtonsoftJson();//.AddXmlDataContractSeria
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<ILogging, LoggingV2>(); //addSingleton, addScoped , addTransient 
+//With dependency injection we can just change Logging to LoggingV2 and change the whole implementation 
 
 var app = builder.Build();
 

@@ -1,4 +1,5 @@
 ﻿using MagicVilla_VillaAPI.Models;
+using MagicVilla_VillaAPI.Logging;
 using MagicVilla_VillaAPI.Models.DTO;
 using MagicVilla_VillaAPI.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -10,17 +11,23 @@ namespace MagicVilla_VillaAPI.Controllers
     [ApiController]
     public class VillaAPIController :ControllerBase
     {
-        private readonly ILogger<VillaAPIController> _logger;
+        //private readonly ILogger<VillaAPIController> _logger;
 
-        public VillaAPIController(ILogger<VillaAPIController> logger)
-        {
-            _logger = logger;
+        //public VillaAPIController(ILogger<VillaAPIController> logger)
+        //{
+        //    _logger = logger;
+        //} In order to implement our own logger thru Dependency Injection we comment this 
+
+        private readonly ILogging _logger;
+        public VillaAPIController(ILogging logging) {
+            _logger = logging;
         }
 
         [HttpGet]
         public ActionResult< IEnumerable<VillaDTO>>GetVillas() //Creating a public enumerable method getVillas of type Villa 
         {
-            _logger.LogInformation("Getting All Villas");
+            _logger.Log("Getting All Villas","");
+            //_logger.LogInformation("Getting All Villas");
             return Ok(VillaStore.villaList);
         }
 
@@ -30,7 +37,8 @@ namespace MagicVilla_VillaAPI.Controllers
             var villa=VillaStore.villaList.FirstOrDefault(x=>x.Id==id);
             if (id == 0)
             {
-                _logger.LogInformation("Get Villa Error with " + id);
+                _logger.Log("Get Villa Error with " + id,"error");
+                //_logger.LogInformation("Get Villa Error with " + id);
                 return BadRequest();
             }
             else if (villa == null)
