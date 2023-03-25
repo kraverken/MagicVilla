@@ -1,7 +1,12 @@
-﻿namespace MagicVilla_VillaAPI.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace MagicVilla_VillaAPI.Models
 {
     public class Villa
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)] //Adding key to id and making it auto generated
         public int Id { get; set; }
         public string Name { get; set; }
         public string Details { get; set; }
