@@ -19,8 +19,11 @@ namespace MagicVilla_VillaAPI.Controllers
         //} In order to implement our own logger thru Dependency Injection we comment this 
 
         private readonly ILogging _logger;
-        public VillaAPIController(ILogging logging) {
+        private readonly ApplicationDBContext _db;
+        public VillaAPIController(ILogging logging, ApplicationDBContext db)
+        {
             _logger = logging;
+            _db = db;
         }
 
         [HttpGet]
@@ -28,13 +31,17 @@ namespace MagicVilla_VillaAPI.Controllers
         {
             _logger.Log("Getting All Villas","");
             //_logger.LogInformation("Getting All Villas");
-            return Ok(VillaStore.villaList);
+
+            //return Ok(VillaStore.villaList);
+            return Ok(_db.Villas);
         }
 
         [HttpGet("{id:int}", Name ="GetVilla")]
         public ActionResult<VillaDTO> GetVilla(int id) //Creating a public enumerable method getVillas of type Villa 
         {
-            var villa=VillaStore.villaList.FirstOrDefault(x=>x.Id==id);
+            //var villa=VillaStore.villaList.FirstOrDefault(x=>x.Id==id);
+            var villa=_db.Villas.FirstOrDefault(x=>x.Id==id);
+
             if (id == 0)
             {
                 _logger.Log("Get Villa Error with " + id,"error");
@@ -55,11 +62,12 @@ namespace MagicVilla_VillaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         public ActionResult<VillaDTO> CreateVilla([FromBody] VillaDTO villaDTO) //property to be bounded using request body
         {
-            //if (villastore.villalist.firstordefault(u => u.name.tolower() == villadto.name.tolower())
+            //if (_db.Villas.FirstOrDefault(u => u.Name.ToLower() == villaDTO.Name.ToLower())
             //{
-            //    modelstate.addmodelerror("customerror", "villa already exists!"); //first parameter is key second is error message 
-            //    return badrequest(modelstate);
+            //    ModelState.AddModelError("customerror", "villa already exists!"); //first parameter is key second is error message 
+            //    return BadRequest(ModelState);
             //}
+
             if (villaDTO == null)
             {
                 return BadRequest(villaDTO);
@@ -68,8 +76,24 @@ namespace MagicVilla_VillaAPI.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
-            villaDTO.Id=VillaStore.villaList.OrderByDescending(u=>u.Id).FirstOrDefault().Id+1;
-            VillaStore.villaList.Add(villaDTO);
+            //villaDTO.Id=VillaStore.villaList.OrderByDescending(u=>u.Id).FirstOrDefault().Id+1; not needed as now Id is a key 
+
+            Villa model= new()
+                {
+                    Amenity=villaDTO.Amenity,
+                    Details=villaDTO.Details,
+                    Id=villaDTO.Id,
+                    ImageUrl=villaDTO.ImageUrl,
+                    Name=villaDTO.Name,
+                    Occupancy=villaDTO.Occupancy,
+                    Rate=villaDTO.Rate,
+                    Sqft=villaDTO.Sqft,
+                }; //use this to remove the villa is not null error
+            _db.Villas.Add(model);
+            _db.SaveChanges();
+
+            //VillaStore.villaList.Add(villaDTO);
+
             //return Ok(villaDTO);
             return CreatedAtRoute("GetVilla",new { id = villaDTO.Id }, villaDTO);
         }
@@ -79,18 +103,23 @@ namespace MagicVilla_VillaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
 
-        public IActionResult DeleteVilla(int id) //Iactionresult automatically decides the return type
+        public IActionResult DeleteVilla(int id) //Iactionresult automatically decides the return type 
         {
             if (id == 0)
             {
                 return BadRequest();
             }
-            var villa= VillaStore.villaList.FirstOrDefault(u=>u.Id==id);
+            var villa= _db.Villas.FirstOrDefault(u=>u.Id==id);
+            //var villa = VillaStore.villaList.FirstOrDefault(u => u.Id == id);
             if (villa == null)
             {
                 return NotFound();
             }
-            VillaStore.villaList.Remove(villa);
+            _db.Villas.Remove(villa);
+            _db.SaveChanges();
+
+            //VillaStore.villaList.Remove(villa);
+
             return NoContent();
         }
 
@@ -104,10 +133,24 @@ namespace MagicVilla_VillaAPI.Controllers
             {
                 return BadRequest();
             }
-            var villa= VillaStore.villaList.FirstOrDefault(u=>u.Id==id);
-            villa.Name=villaDTO.Name;
-            villa.Occupancy=villaDTO.Occupancy;
-            villa.Sqft=villaDTO.Sqft;
+            //var villa= VillaStore.villaList.FirstOrDefault(u=>u.Id==id);
+            //villa.Name=villaDTO.Name;
+            //villa.Occupancy=villaDTO.Occupancy;
+            //villa.Sqft=villaDTO.Sqft;
+
+            Villa model = new()
+            {
+                Amenity = villaDTO.Amenity,
+                Details = villaDTO.Details,
+                Id = villaDTO.Id,
+                ImageUrl = villaDTO.ImageUrl,
+                Name = villaDTO.Name,
+                Occupancy = villaDTO.Occupancy,
+                Rate = villaDTO.Rate,
+                Sqft = villaDTO.Sqft,
+            };
+            _db.Villas.Update(model);
+            _db.SaveChanges();
 
             return NoContent();
         }
@@ -121,12 +164,44 @@ namespace MagicVilla_VillaAPI.Controllers
             {
                 return BadRequest();
             }
-            var villa= VillaStore.villaList.FirstOrDefault(u=>u.Id==id);
-            if(villa == null)
+
+            var villa = _db.Villas.FirstOrDefault(u => u.Id == id);
+            //var villa = VillaStore.villaList.FirstOrDefault(u=>u.Id==id);
+
+            VillaDTO villaDTO = new()
+            {
+                Amenity = villa.Amenity,
+                Details = villa.Details,
+                Id = villa.Id,
+                ImageUrl = villa.ImageUrl,
+                Name = villa.Name,
+                Occupancy = villa.Occupancy,
+                Rate = villa.Rate,
+                Sqft = villa.Sqft,
+            };
+            if (villa == null)
             {
                 return BadRequest();
             }
-            patchDTO.ApplyTo(villa,ModelState);
+
+            patchDTO.ApplyTo(villaDTO,ModelState);
+            //patchDTO.ApplyTo(villa,ModelState);
+
+            Villa model = new Villa()
+            {
+                Amenity = villaDTO.Amenity,
+                Details = villaDTO.Details,
+                Id = villaDTO.Id,
+                ImageUrl = villaDTO.ImageUrl,
+                Name = villaDTO.Name,
+                Occupancy = villaDTO.Occupancy,
+                Rate = villaDTO.Rate,
+                Sqft = villaDTO.Sqft,
+            };
+
+            _db.Villas.Update(model);
+            _db.SaveChanges();
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
